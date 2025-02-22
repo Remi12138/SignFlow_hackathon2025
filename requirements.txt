@@ -1,0 +1,9 @@
+Flask
+flask-socketio
+psycopg2
+psycopg2-binary
+numpy
+sentence-transformers
+python-dotenv
+openai
+requests
