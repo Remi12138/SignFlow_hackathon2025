@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time ASL Detection</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        video { border: 2px solid black; }
+        canvas { display: none; }
+        #prediction { font-size: 24px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>ASL Sign Detection</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    
+    <br><br>
+    <button onclick="captureImage()">Predict Sign</button>
+    <p id="prediction">Prediction: </p>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        // Access webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => console.error("Error accessing webcam: ", err));
+
+        function captureImage() {
+            // Capture frame from video
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            // Send image to Flask for prediction
+            fetch('/predict', {
+                method: 'POST',
+                body: JSON.stringify({ image: imageData }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('prediction').innerText = "Prediction: " + data.prediction;
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+
+</body>
+</html>
