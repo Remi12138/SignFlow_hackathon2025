@@ -18,15 +18,15 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 dotenv.load_dotenv()
 
 # OpenAI API Key
-OPENAI_API_KEY = ""
+OPENAI_API_KEY = "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"
 
 conn = psycopg2.connect(
-                database="",
-                host="",
-                user="",
-                password="",
-                port=,
-            )
+    database="asl",
+    host="2.tcp.ngrok.io",
+    user="xxx",
+    password="lovecoding",
+    port=18754,
+)
 
 cursor = conn.cursor()
 
@@ -118,11 +118,11 @@ def handle_request_animation(data):
     try:
         if conn.closed:
             conn = psycopg2.connect(
-                database="",
-                host="",
-                user="",
-                password="",
-                port=,
+                database="asl",
+                host="2.tcp.ngrok.io",
+                user="xxx",
+                password="lovecoding",
+                port=18754,
             )
             cursor = conn.cursor()
     except Exception as e:
@@ -147,3 +147,4 @@ def handle_request_animation(data):
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, host="0.0.0.0", port=5005)
+
