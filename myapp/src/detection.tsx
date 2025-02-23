@@ -37,7 +37,7 @@ export default function HandSignDetection() {
 
     // Define crop area (red frame box)
     const x = 220;
-    const y = 140;
+    const y = 160;
     const width = 200;
     const height = 200;
 
@@ -72,11 +72,11 @@ export default function HandSignDetection() {
       <h1 className="text-2xl font-bold">ASL Hand Sign Detection</h1>
 
       {/* Video Container with Red Frame Overlay */}
-      <div className="relative w-[640px] h-[480px]">
+      <div className="relative w-[960px] h-[540px]">
         <video
           ref={videoRef}
-          width="640"
-          height="480"
+          width="960"
+          height="540"
           autoPlay
           className="absolute top-0 left-0 w-full h-full border border-gray-400"
         />
@@ -109,7 +109,7 @@ export default function HandSignDetection() {
           {loading ? "Predicting..." : "Predict Sign"}
         </button>
       </div>
-
+      
       {/* Prediction Result */}
       <p className="text-xl font-semibold">
         Prediction: <span className="text-blue-600">{prediction || "Waiting for input..."}</span>
