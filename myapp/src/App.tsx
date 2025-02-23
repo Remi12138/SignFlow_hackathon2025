@@ -12,7 +12,7 @@ export default function App() {
       <div className="app-container">
         {tab === "home" && (
           <div className="home-content">
-            <h1>Welcome to XX</h1>
+            <h1>Welcome to SignFlow</h1>
             <div className="button-container">
               <Link to="/asl-animation">
                 <button className="action-button" onClick={() => setTab("animation")}>

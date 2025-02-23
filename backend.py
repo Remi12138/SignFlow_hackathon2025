@@ -20,14 +20,14 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # dotenv.load_dotenv()
 
 # OpenAI API Key
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = ""
 
 conn = psycopg2.connect(
     database="asl",
-    host="2.tcp.ngrok.io",
+    host="xxx",
     user="xxx",
-    password="lovecoding",
-    port=18754,
+    password="xxx",
+    port=xxx,
 )
 cursor = conn.cursor()
 
@@ -49,11 +49,9 @@ def translate_to_asl_gloss(text):
     image ==> picture
     conversations ==> talk
     type of ==> type
-    ? ==> question
     Watch ==> see
 
-    Translate the following English text to ASL Gloss. 
-    Follow ASL grammar order: object, then subject, then verb. 
+    Translate the following English text to ASL Gloss.  
     Remove words like IS and ARE that are not present in ASL. Replace I with ME. 
     Do not add classifiers. 
     All lowercase, don't capitalize the first letter.
@@ -120,10 +118,10 @@ def handle_request_animation(data):
         if conn.closed:
             conn = psycopg2.connect(
                 database="asl",
-                host="2.tcp.ngrok.io",
+                host="xxx",
                 user="xxx",
-                password="lovecoding",
-                port=18754,
+                password="xxx",
+                port=xxx,
             )
             cursor = conn.cursor()
     except Exception as e:
