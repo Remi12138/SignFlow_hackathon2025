@@ -16,8 +16,9 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 # PostgreSQL Connection
 dotenv.load_dotenv()
+
 # OpenAI API Key
-OPENAI_API_KEY = "...."
+OPENAI_API_KEY = ""
 
 conn = psycopg2.connect(
     database="asl",
@@ -98,8 +99,7 @@ def handle_request_animation(data):
         return
 
 
-    gloss_text = translate_to_asl_gloss(text)
-    words = extract_gloss_list(gloss_text)
+    words = translate_to_asl_gloss(text)
 
     word_embeddings = [embedding_model.encode(word) for word in words]
 
