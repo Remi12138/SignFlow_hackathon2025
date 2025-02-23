@@ -21,12 +21,12 @@ dotenv.load_dotenv()
 OPENAI_API_KEY = ""
 
 conn = psycopg2.connect(
-    database="asl",
-    host="localhost",
-    user="xxx",
-    password=os.getenv("POSTGRES_PASSWORD"),
-    port=5432,
-)
+                database="",
+                host="",
+                user="",
+                password="",
+                port=,
+            )
 
 cursor = conn.cursor()
 
@@ -118,11 +118,11 @@ def handle_request_animation(data):
     try:
         if conn.closed:
             conn = psycopg2.connect(
-                database="asl",
-                host="localhost",
-                user="postgres",
-                password="yourpassword",
-                port=5432,
+                database="",
+                host="",
+                user="",
+                password="",
+                port=,
             )
             cursor = conn.cursor()
     except Exception as e:
