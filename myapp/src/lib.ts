@@ -12,69 +12,6 @@ function drawPoint(x: number, y: number, z: number) {
   sphere.position.set(x * SCALE, -y * SCALE, z * SCALE);
 }
 
-// function drawLine(
-//   scene: THREE.Scene,
-//   x1: number,
-//   y1: number,
-//   z1: number,
-//   x2: number,
-//   y2: number,
-//   z2: number,
-//   color: number,
-//   opacity?: number,
-//   width?: number
-// ) {
-//   const p = [];
-//   p.push(new THREE.Vector3(x1, -y1, z1));
-//   p.push(new THREE.Vector3(x2, -y2, z2));
-//   const geometry = new THREE.BufferGeometry().setFromPoints(p);
-//   // const material = new MeshLineMaterial({
-//   //   color: color,
-//   //   opacity: opacity || 1,
-//   //   lineWidth: width || 0.08,
-//   //   transparent: true,
-//   //   depthTest: false,
-//   // });
-//   const material = new MeshLineMaterial({
-//     color: color,
-//     lineWidth: width || 0.08,
-//   }) as unknown as THREE.Material; 
-//   material.transparent = true;
-//   material.opacity = opacity ?? 1;
-//   material.depthTest = false;
-
-//   const line = new MeshLine();
-//   line.setGeometry(geometry);
-
-//   const mesh = new THREE.Mesh(line as unknown as THREE.BufferGeometry, material);
-//   scene.add(mesh);
-// }
-
-// function drawLine(
-//   scene: THREE.Scene,
-//   x1: number, y1: number, z1: number,
-//   x2: number, y2: number, z2: number,
-//   color: number = 0xffffff,
-//   opacity: number = 1,  // ✅ Add opacity parameter
-//   width: number = 0.1  // ✅ Add width parameter
-// ) {
-//   const points = [
-//     new THREE.Vector3(x1, y1, z1),
-//     new THREE.Vector3(x2, y2, z2),
-//   ];
-
-//   const geometry = new THREE.BufferGeometry().setFromPoints(points);
-//   const material = new THREE.LineBasicMaterial({
-//     color,
-//     linewidth: width,  // ✅ Use width
-//     transparent: true,  // ✅ Allow transparency
-//     opacity,  // ✅ Set opacity
-//   });
-
-//   const line = new THREE.Line(geometry, material);
-//   scene.add(line);
-// }
-
 function drawLine(
   scene: THREE.Scene,
   x1: number, y1: number, z1: number,

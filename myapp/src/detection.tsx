@@ -1,10 +1,12 @@
 import { useRef, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function HandSignDetection() {
+export default function HandSignDetection({ setTab }: { setTab: (tab: "home") => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [prediction, setPrediction] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const startCamera = async () => {
@@ -20,14 +22,23 @@ export default function HandSignDetection() {
 
     startCamera();
 
-    return () => {
-      if (videoRef.current?.srcObject) {
-        (videoRef.current.srcObject as MediaStream)
-          .getTracks()
-          .forEach((track) => track.stop());
-      }
-    };
+    return stopCamera; // Stops camera when leaving the page
   }, []);
+
+  const stopCamera = () => {
+    if (videoRef.current?.srcObject) {
+      (videoRef.current.srcObject as MediaStream)
+        .getTracks()
+        .forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  const handleReturnHome = () => {
+    stopCamera(); // Stop the camera
+    setTab("home"); // Update tab state
+    navigate("/"); // Navigate home
+  };
 
   const captureImage = async () => {
     if (!canvasRef.current || !videoRef.current) return;
@@ -61,7 +72,7 @@ export default function HandSignDetection() {
       setPrediction(data.prediction);
     } catch (error) {
       console.error("Error predicting sign:", error);
-      setPrediction("Error predicting sign:"+error);
+      setPrediction("Error predicting sign:" + error);
     } finally {
       setLoading(false);
     }
@@ -71,7 +82,7 @@ export default function HandSignDetection() {
     <div className="flex flex-col items-center space-y-4">
       <h1 className="text-2xl font-bold">ASL Hand Sign Detection</h1>
 
-      {/* Video Container with Red Frame Overlay */}
+      {/* Video Container */}
       <div className="relative w-[960px] h-[540px]">
         <video
           ref={videoRef}
@@ -81,15 +92,15 @@ export default function HandSignDetection() {
           className="absolute top-0 left-0 w-full h-full border border-gray-400"
         />
 
-        {/* Red Frame for Detection Area */}
+        {/* Red Frame */}
         <div
           className="absolute border-4 border-red-500"
           style={{
-            top: "140px",  // Fixed pixel values for proper positioning
+            top: "140px",
             left: "220px",
             width: "200px",
             height: "200px",
-            zIndex: 10, // Ensures it appears above the video
+            zIndex: 10,
             position: "absolute",
             border: "4px solid red",
           }}
@@ -107,6 +118,14 @@ export default function HandSignDetection() {
           disabled={loading}
         >
           {loading ? "Predicting..." : "Predict Sign"}
+        </button>
+
+        {/* Return to Home Button */}
+        <button
+          onClick={handleReturnHome}
+          className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+        >
+          Return to Home
         </button>
       </div>
       
