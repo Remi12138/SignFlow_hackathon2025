@@ -2,6 +2,9 @@
 
 Convert speech to ASL with 3D signing and display a virtual ASL interpreter using a virtual camera for seamless online meetings. Practice fingerspelling with real-time ASL alphabet recognition.
 
+### YouTube  
+[Watch the video](https://www.youtube.com/watch?v=284L0caFRUI&t=132s)
+
 ### **Inspiration**
 
 At Duke University’s 100th-anniversary celebration, a live ASL interpreter translated the event in real time. Watching the expressive motions of sign language, we realized how much more engaging and natural it felt compared to plain captions or text. For Deaf individuals, these dynamic gestures create a sense of connection, inclusion, and belonging that words alone cannot achieve.
