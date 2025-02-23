@@ -11,11 +11,15 @@ export default function Visualization({ signingSpeed }: { signingSpeed: number }
   const [inputText, setInputText] = useState<string>(""); // Stores user input
   const [lastInputText, setLastInputText] = useState<string>(""); // Stores last sent input
 
-    // recording
-    const [isRecording, setIsRecording] = useState(false);
-    const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null); 
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const audioChunksRef = useRef<Blob[]>([]);
+  // recording
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null); 
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  
+  // file upload state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
 
   // Send input to backend when button is clicked
   const handleSendInput = () => {
@@ -29,6 +33,35 @@ export default function Visualization({ signingSpeed }: { signingSpeed: number }
   const handleReplay = () => {
     if (lastInputText.trim() !== "") {
       socket.emit("E-REQUEST-ANIMATION", lastInputText);
+    }
+  };
+
+  // Handle file upload change event
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      // Provide a preview of the file
+      const previewUrl = URL.createObjectURL(file);
+      setFilePreviewUrl(previewUrl);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const response = await fetch("http://localhost:5005/transcribe", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+        if (data.text) {
+          socket.emit("E-REQUEST-ANIMATION", data.text);
+          setLastInputText(data.text);
+        } else {
+          console.error("Transcription error:", data.error);
+        }
+      } catch (error) {
+        console.error("Error during transcription:", error);
+      }
     }
   };
 
@@ -160,13 +193,26 @@ export default function Visualization({ signingSpeed }: { signingSpeed: number }
             Stop Recording
           </button>
         )}
-
+      {/* file upload (support audio and video) */}
+      <input type="file" accept="audio/*,video/*" onChange={handleFileUpload} />
       </div>
 
       {audioPreviewUrl && (
         <div className="mb-4">
           <p className="text-white">Audio Preview: </p>
           <audio src={audioPreviewUrl} controls />
+        </div>
+      )}
+
+        {/* file preview） */}
+        {filePreviewUrl && selectedFile && (
+        <div className="mb-4">
+          <p className="text-white">File Preview:</p>
+          {selectedFile.type.startsWith("video/") ? (
+            <video src={filePreviewUrl} controls width="300" />
+          ) : (
+            <audio src={filePreviewUrl} controls />
+          )}
         </div>
       )}
 
