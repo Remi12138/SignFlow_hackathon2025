@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import { Canvas } from "@react-three/fiber";
 import Avatar from "./Avatar";
@@ -10,6 +10,16 @@ export default function Visualization({ signingSpeed }: { signingSpeed: number }
   const [currentWord, setCurrentWord] = useState<string>("");
   const [inputText, setInputText] = useState<string>(""); // Stores user input
   const [lastInputText, setLastInputText] = useState<string>(""); // Stores last sent input
+
+  // recording
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null); 
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  
+  // file upload state
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
 
   // Send input to backend when button is clicked
   const handleSendInput = () => {
@@ -23,6 +33,97 @@ export default function Visualization({ signingSpeed }: { signingSpeed: number }
   const handleReplay = () => {
     if (lastInputText.trim() !== "") {
       socket.emit("E-REQUEST-ANIMATION", lastInputText);
+    }
+  };
+
+  // Handle file upload change event
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      // Provide a preview of the file
+      const previewUrl = URL.createObjectURL(file);
+      setFilePreviewUrl(previewUrl);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const response = await fetch("http://localhost:5005/transcribe", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+        if (data.text) {
+          socket.emit("E-REQUEST-ANIMATION", data.text);
+          setLastInputText(data.text);
+        } else {
+          console.error("Transcription error:", data.error);
+        }
+      } catch (error) {
+        console.error("Error during transcription:", error);
+      }
+    }
+  };
+
+  // start recording
+  const startRecording = async () => {
+    console.log("Starting recording...");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      // clear audioChunksRef
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = event => {
+        console.log("ondataavailable event:", event.data, "大小：", event.data.size);
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+  
+      mediaRecorder.start(1000);
+      setIsRecording(true);
+      setAudioPreviewUrl(null);
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+    }
+  };
+  
+  // stop recording
+  const stopRecording = () => {
+    console.log("Stopping recording...");
+    if (mediaRecorderRef.current) {
+      // regiseter onstop event
+      mediaRecorderRef.current.onstop = async () => {
+        console.log("Recording stopped");
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        console.log("Blob:", audioBlob, "size", audioBlob.size);
+        // provide a preview of the audio
+        const previewUrl = URL.createObjectURL(audioBlob);
+        setAudioPreviewUrl(previewUrl);
+
+        audioChunksRef.current = [];
+        const formData = new FormData();
+        formData.append("file", audioBlob, "recording.webm");
+        try {
+          const response = await fetch("http://localhost:5005/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await response.json();
+          if (data.text) {
+            socket.emit("E-REQUEST-ANIMATION", data.text);
+            setLastInputText(data.text);
+          } else {
+            console.error("Transcription error:", data.error);
+          }
+        } catch (error) {
+          console.error("Error during transcription:", error);
+        }
+      };
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
     }
   };
 
@@ -75,7 +176,45 @@ export default function Visualization({ signingSpeed }: { signingSpeed: number }
         >
           Replay
         </button>
+
+        {!isRecording && (
+          <button
+            onClick={startRecording}
+            className="px-4 py-2 bg-purple-500 text-white rounded-md"
+          >
+            Start Recording
+          </button>
+        )}
+        {isRecording && (
+          <button
+            onClick={stopRecording}
+            className="px-4 py-2 bg-red-500 text-white rounded-md"
+          >
+            Stop Recording
+          </button>
+        )}
+      {/* file upload (support audio and video) */}
+      <input type="file" accept="audio/*,video/*" onChange={handleFileUpload} />
       </div>
+
+      {audioPreviewUrl && (
+        <div className="mb-4">
+          <p className="text-white">Audio Preview: </p>
+          <audio src={audioPreviewUrl} controls />
+        </div>
+      )}
+
+        {/* file preview） */}
+        {filePreviewUrl && selectedFile && (
+        <div className="mb-4">
+          <p className="text-white">File Preview:</p>
+          {selectedFile.type.startsWith("video/") ? (
+            <video src={filePreviewUrl} controls width="300" />
+          ) : (
+            <audio src={filePreviewUrl} controls />
+          )}
+        </div>
+      )}
 
       {/* Display current word */}
       <p className="absolute z-10 text-white bottom-10 w-full flex justify-center text-4xl">

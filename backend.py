@@ -1,5 +1,6 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
+from flask_cors import CORS
 import psycopg2
 import os
 import json
@@ -12,6 +13,7 @@ import requests
 
 
 app = Flask(__name__)
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # PostgreSQL Connection
@@ -144,6 +146,36 @@ def handle_request_animation(data):
             continue  # Skip this word and try the next one
 
     emit("E-ANIMATION", animations)
+
+@app.route("/transcribe", methods=["POST"])
+def transcribe_audio():
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    audio_file = request.files["file"]
+    try:
+        headers = {
+            "Authorization": f"Bearer {OPENAI_API_KEY}"
+        }
+        files = {
+            "file": (audio_file.filename, audio_file, audio_file.mimetype)
+        }
+        data = {
+            "model": "whisper-1"
+        }
+        response = requests.post(
+            "https://api.openai.com/v1/audio/transcriptions",
+            headers=headers,
+            files=files,
+            data=data
+        )
+        result = response.json()
+        text = result.get("text", "")
+        print("Transcribed Text:", text)
+        return jsonify({"text": text})
+    except Exception as e:
+        print("Transcription error:", e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, host="0.0.0.0", port=5005)
